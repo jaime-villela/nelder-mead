@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from simplex_matrix import SimplexTriangle
+from simplex_matrix import SimplexTriangle, SimplexMatrix
 
 class TestSimplexTriangle(unittest.TestCase):
     def test_initialization(self):
@@ -36,6 +36,35 @@ class TestSimplexTriangle(unittest.TestCase):
         # Verify other rows remain unchanged
         self.assertTrue(np.array_equal(triangle.matrix[SimplexTriangle.GOOD_ROW], [0, 0, 0]))
         self.assertTrue(np.array_equal(triangle.matrix[SimplexTriangle.WORST_ROW], [0, 0, 0]))
+
+    def test_evaluate_func_at_vertex(self):
+        """Test the evaluate_func_at_vertex method."""
+        # Define a simple function to test
+        def test_function(x, y):
+            return x + y
+
+        # Create a SimplexMatrix instance with the test function
+
+        # Initialize the matrix with test values
+        sameple_matrix = np.array([
+            [1, 2, 0],  # x=1, y=2, z=0 (to be calculated)
+            [3, 4, 0],  # x=3, y=4, z=0 (to be calculated)
+            [5, 6, 0]   # x=5, y=6, z=0 (to be calculated)
+        ])
+
+        simplex = SimplexTriangle.create_from_matrix(sameple_matrix, test_function)
+
+        # Evaluate the function at the first vertex (index 0)
+        simplex.evaluate_func_at_vertex(0)
+
+        # Check that the result is correctly stored in the last column
+        self.assertEqual(simplex.matrix[0, 2], 3)  # 1 + 2 = 3
+
+        # Evaluate the function at the second vertex (index 1)
+        simplex.evaluate_func_at_vertex(1)
+
+        # Check that the result is correctly stored in the last column
+        self.assertEqual(simplex.matrix[1, 2], 7)  # 3 + 4 = 7
 
 if __name__ == "__main__":
     unittest.main()

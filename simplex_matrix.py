@@ -18,6 +18,7 @@ class SimplexMatrix:
     Attributes:
         num_rows (int): number of rows in the matrix
         num_cols (int): number of columns in the matrix
+        matrix (numpy.ndarray): the n+1 dimension matrix
     """
 
     def __init__(self, num_rows, num_cols):
@@ -65,12 +66,14 @@ class SimplexMatrix:
         self.matrix = self.matrix[self.matrix[:, column_index].argsort()]
 
     @classmethod
-    def create_from_matrix(cls, matrix):
+    def create_from_matrix(cls, matrix, func):
         """
         Create a new SimplexMatrix instance from an existing matrix.
 
         Args:
-            matrix (np.ndarray): A NumPy array representing the simplex.
+            cls (SimplexMatrix): the base class
+            matrix (np.ndarray): A NumPy array representing the simplex
+            func (callable): A function to be used with the simplex.
 
         Returns:
             SimplexMatrix: A new instance of the SimplexMatrix class.
@@ -86,6 +89,7 @@ class SimplexMatrix:
         num_rows, num_cols = matrix.shape
         instance = cls(num_rows, num_cols - 1)  # Subtract 1 because the extra column is already included
         instance.matrix = matrix
+        instance.func = func
         return instance
 
 
@@ -97,8 +101,7 @@ class SimplexTriangle(SimplexMatrix):
     of the function at x,y).
 
     Attributes:
-        num_rows (int): since this is a triangle, 3 rows - one for each vertex
-        num_cols (int): since this is in two dimensions, 2 - the extra column is added on init
+        func (callable, optional): The function to evaluate at each vertex of the simplex.
     """
 
     # Define constants for indexing rows
@@ -106,6 +109,34 @@ class SimplexTriangle(SimplexMatrix):
     GOOD_ROW = 1
     WORST_ROW = 2
 
-    def __init__(self):
-        # Call the parent class constructor
+    def __init__(self, func=None, *args, **kwargs):
+        """
+        Initialize the SimplexTriangle.
+
+        Args:
+            func (callable, optional): The function to evaluate at each vertex.
+            *args: Additional positional arguments (ignored).
+            **kwargs: Additional keyword arguments (ignored).
+        """        
         super().__init__(3, 2)
+        self.func = func
+        
+    def evaluate_func_at_vertex(self, index):
+        """
+        Evaluates the function at a particular row in the matrix.  That is, this will
+        call the function f(x,y) with the values of x,y in the row and return the 
+        result z in the las column of the row.
+
+        row[z] = f(row[x], row[y])
+
+        Args:
+            cls (SimplexMatrix): the base class
+            matrix (np.ndarray): A NumPy array representing the simplex.
+
+        Returns:
+            SimplexMatrix: A new instance of the SimplexMatrix class.
+
+        Raises:
+            ValueError: If the input matrix is not a 2D NumPy array.
+        """
+        self.matrix[index, 2] = self.func(self.matrix[index, 0], self.matrix[index, 1])
